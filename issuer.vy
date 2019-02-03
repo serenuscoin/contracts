@@ -1,7 +1,7 @@
 # @title Serenus Coin Issuer contract
 # @notice Anyone can create an Issuer instance using a template
 # @notice The contract can become leveraged long ETH/USD
-# @notice A target leverage ratio is set on creation and is modifiable
+# @notice A target collateral ratio is set on creation and is modifiable
 # @notice Source code found at https://github.com/serenuscoin
 # @notice Use at your own risk
 # @dev Compiled with Vyper 0.1.0b5
@@ -17,7 +17,7 @@ contract ERC20Serenus:
 contract Governor:
     def nonce() -> int128: constant
     def issuer_fees() -> uint256: constant
-    def minimum_leverage_ratio() -> uint256: constant
+    def minimum_collateral_ratio() -> uint256: constant
     def liquidity_multiplier() -> uint256: constant
     def erc20_serenus() -> address: constant
     def oracle() -> address: constant
@@ -38,11 +38,11 @@ ETHUSDprice: public(uint256)                                # in cents
 
 issuer_id: public(int128)
 owner: public(address)
-target_leverage_ratio: public(uint256)                      # in bips
+target_collateral_ratio: public(uint256)                      # in bips
 
 nonce: public(int128)
 issuer_fees: public(uint256)                                # in bips
-minimum_leverage_ratio: public(uint256)                     # in bips
+minimum_collateral_ratio: public(uint256)                     # in bips
 liquidity_multiplier: public(uint256)
 
 # @dev An internal erc-20 tracking variable
@@ -52,24 +52,24 @@ num_issued: public(uint256(wei))
 # @params A unique id
 # @params The owner of this Issuer
 # @params Governor contract address
-# @params A target leverage ratio for this Issuer
+# @params A target collateral ratio for this Issuer
 @public
-def setup(_id: int128, _owner: address, _governor: address, _target_leverage_ratio: uint256):
+def setup(_id: int128, _owner: address, _governor: address, _target_collateral_ratio: uint256):
     assert self.owner == ZERO_ADDRESS
 
     self.owner = _owner
     self.issuer_id = _id
     self.governor = _governor
-    self.target_leverage_ratio = _target_leverage_ratio
+    self.target_collateral_ratio = _target_collateral_ratio
     
     self.nonce = self.governor.nonce()
     self.issuer_fees = self.governor.issuer_fees()
-    self.minimum_leverage_ratio = self.governor.minimum_leverage_ratio()
+    self.minimum_collateral_ratio = self.governor.minimum_collateral_ratio()
     self.liquidity_multiplier = self.governor.liquidity_multiplier()
     self.erc20_serenus = self.governor.erc20_serenus()
     self.oracle = self.governor.oracle()
 
-    assert self.target_leverage_ratio >= self.minimum_leverage_ratio
+    assert self.target_collateral_ratio >= self.minimum_collateral_ratio
 
     self.num_issued = 0
 
@@ -83,16 +83,16 @@ def setGovernorAddress(_address: address):
 def readGovernor():
     self.nonce = self.governor.nonce()
     self.issuer_fees = self.governor.issuer_fees()
-    self.minimum_leverage_ratio = self.governor.minimum_leverage_ratio()
+    self.minimum_collateral_ratio = self.governor.minimum_collateral_ratio()
     self.liquidity_multiplier = self.governor.liquidity_multiplier()
     self.erc20_serenus = self.governor.erc20_serenus()
     self.oracle = self.governor.oracle()
 
-# @notice The owner can reset a desirable leverage ratio
+# @notice The owner can reset a desirable collateral ratio
 @public
-def setTargetLeverageRatio(_new_ratio: uint256):
+def setTargetCollateralRatio(_new_ratio: uint256):
     assert msg.sender == self.owner
-    self.target_leverage_ratio = _new_ratio
+    self.target_collateral_ratio = _new_ratio
 
 # @notice The owner must send in some ether and may need to top up later
 @public
@@ -109,7 +109,7 @@ def issuerWithdrawal(_amount: uint256(wei)):
     
     assert _amount <= self.balance
     if self.num_issued != 0:
-        assert ((self.balance - _amount) * self.ETHUSDprice / 100) / self.num_issued >= self.target_leverage_ratio / 10000
+        assert ((self.balance - _amount) * self.ETHUSDprice / 100) / self.num_issued >= self.target_collateral_ratio / 10000
 
     send(self.owner, _amount)
 
@@ -142,7 +142,7 @@ def buyTokens():
     
     self.num_issued += _issuing
     
-    assert ((self.balance + msg.value) * _adjustedPrice / 100) / self.num_issued >= self.target_leverage_ratio / 10000
+    assert ((self.balance + msg.value) * _adjustedPrice / 100) / self.num_issued >= self.target_collateral_ratio / 10000
     
     # sending tokens
     self.erc20_serenus.mint(msg.sender, _issuing)
@@ -169,7 +169,7 @@ def sellTokens(_value: uint256(wei)):
     log.soldTokens(msg.sender, ZERO_ADDRESS, _value)
 
 # @notice Replace issuer if insufficient collateral is available
-# @dev Read current price and check collateral against minimum leverage ratio
+# @dev Read current price and check collateral against minimum collateral ratio
 # @dev Replacer must have paid in sufficient collateral to "win" the remainder from the old owner
 @public
 @payable
@@ -178,8 +178,8 @@ def replaceIssuer():
 
     self.ETHUSDprice = self.oracle.read()
     
-    assert (self.balance * self.ETHUSDprice / 100) / self.num_issued < self.minimum_leverage_ratio / 10000
+    assert (self.balance * self.ETHUSDprice / 100) / self.num_issued < self.minimum_collateral_ratio / 10000
     
-    assert ((self.balance + msg.value) * self.ETHUSDprice / 100) / self.num_issued >= self.minimum_leverage_ratio / 10000
+    assert ((self.balance + msg.value) * self.ETHUSDprice / 100) / self.num_issued >= self.minimum_collateral_ratio / 10000
 
     self.owner = msg.sender

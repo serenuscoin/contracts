@@ -5,7 +5,7 @@
 # @dev Compiled with Vyper 0.1.0b5
 
 contract Issuer:
-    def setup(_id: int128, _owner: address, _governor: address, _target_leverage_ratio: uint256): modifying
+    def setup(_id: int128, _owner: address, _governor: address, _target_collateral_ratio: uint256): modifying
 
 contract ERC20Serenus:
     def setMinterAddress(_issuer: address): modifying
@@ -49,12 +49,12 @@ def setGovernorAddress(_address: address):
 
 # @notice Create an issuer from the template
 # @notice Send it a new id, the creator's address, a governor address and a target ratio
-# @params A target leverage ratio
+# @params A target collateral ratio
 @public
-def createIssuer(_target_leverage_ratio: uint256):
+def createIssuer(_target_collateral_ratio: uint256):
     self.issuer_id += 1    
     _new_issuer: address = create_with_code_of(self.issuer_template)
-    Issuer(_new_issuer).setup(self.issuer_id, msg.sender, self.governor, _target_leverage_ratio)
+    Issuer(_new_issuer).setup(self.issuer_id, msg.sender, self.governor, _target_collateral_ratio)
     ERC20Serenus(self.erc20_serenus).setMinterAddress(_new_issuer)
     log.NewIssuer(self.issuer_id, _new_issuer)
 
