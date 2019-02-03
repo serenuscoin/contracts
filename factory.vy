@@ -27,6 +27,8 @@ def __init__():
     self.erc20_serenus = 0x3052D1c679eA96500fda71A5Af1Bc2f5fAbC0dA0
     self.governor = 0x86C11371D65478c2E1FcdEe9fc4dBb0ebD6467A9
 
+    self.issuer_id = 1                                      # bumped to 1 after a recompile
+
 @public
 def liquidate():
     assert msg.sender == self.owner

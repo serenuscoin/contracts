@@ -17,10 +17,10 @@ oracle: public(address)
 @public
 def __init__():
     self.owner = msg.sender
-    self.nonce = 1
-    self.issuer_fees = 20                                 # in bips
+    self.nonce = 2                                          # bumped after a recompile
+    self.issuer_fees = 20                                   # in bips
     self.minimum_collateral_ratio = 12000                   # in bips
-    self.liquidity_multiplier = 1 * 10**17                # 0.1 ether (in wei) per cent of ETH/USD price
+    self.liquidity_multiplier = 1 * 10**17                  # 0.1 ether (in wei) per cent of ETH/USD price
     self.erc20_serenus = 0x3052D1c679eA96500fda71A5Af1Bc2f5fAbC0dA0
     self.oracle = 0x31130468244Ec6746D24482B14E68365440AAB0A
 
