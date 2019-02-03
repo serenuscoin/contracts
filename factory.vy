@@ -23,7 +23,7 @@ owner: public(address)
 @public
 def __init__():
     self.owner = msg.sender
-    self.issuer_template = 0xf7633BC2BcD08Fe900EE2413ed1b4f704209A51A
+    self.issuer_template = 0x5068E1f0c4865B1B86D2b94238eEf958446fDb2c
     self.erc20_serenus = 0x3052D1c679eA96500fda71A5Af1Bc2f5fAbC0dA0
     self.governor = 0x86C11371D65478c2E1FcdEe9fc4dBb0ebD6467A9
 
