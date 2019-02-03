@@ -28,6 +28,7 @@ contract Oracle:
     
 boughtTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
 soldTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
+liquidateContract: event({selfaddress: indexed(address)})
 loge: event({_text: bytes32, _value: uint256(wei)})
 
 erc20_serenus: ERC20Serenus
@@ -119,6 +120,7 @@ def issuerLiquidate():
     assert msg.sender == self.owner
     assert self.num_issued == 0
     self.erc20_serenus.removeMinterAddress()
+    log.liquidateContract(self)
     selfdestruct(self.owner)
 
 # @notice Users may buy tokens from this Issuer contract
