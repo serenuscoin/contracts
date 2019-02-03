@@ -25,7 +25,7 @@ def __init__():
     self.owner = msg.sender
     self.issuer_template = 0x5068E1f0c4865B1B86D2b94238eEf958446fDb2c
     self.erc20_serenus = 0x3052D1c679eA96500fda71A5Af1Bc2f5fAbC0dA0
-    self.governor = 0x86C11371D65478c2E1FcdEe9fc4dBb0ebD6467A9
+    self.governor = 0x8cBf8d190Bc49B18147E155f2112ad17Dc3F886c
 
     self.issuer_id = 1                                      # bumped to 1 after a recompile
 
