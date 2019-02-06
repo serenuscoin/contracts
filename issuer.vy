@@ -21,7 +21,8 @@ contract Governor:
     def liquidity_multiplier() -> uint256: constant
     def erc20_serenus() -> address: constant
     def oracle() -> address: constant
-
+    def owner() -> address: constant
+    
 # @dev Contract interface for the Oracle
 contract Oracle:
     def read() -> uint256: constant
@@ -76,7 +77,7 @@ def setup(_id: int128, _owner: address, _governor: address, _target_collateral_r
 
 @public
 def setGovernorAddress(_address: address):
-    assert msg.sender == self.owner
+    assert msg.sender == self.governor.owner()
     self.governor = _address
 
 # @notice Anyone can force the issuer to read new Governor contract values (if any)
@@ -160,7 +161,7 @@ def sellTokens(_value: uint256(wei)):
 
     self.ETHUSDprice = self.oracle.read()
     
-    _adjustedPrice: uint256 = self.ETHUSDprice + as_unitless_number(_value) / self.liquidity_multiplier
+    _adjustedPrice: uint256 = self.ETHUSDprice + as_unitless_number(_value) / self.ETHUSDprice / self.liquidity_multiplier
     
     _ether: uint256(wei) = (_value * 100) / _adjustedPrice
 
