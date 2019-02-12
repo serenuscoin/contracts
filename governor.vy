@@ -3,7 +3,7 @@
 # @notice No Issuer contract can mint/burn unless up-to-date
 # @notice Source code found at https://github.com/serenuscoin
 # @notice Use at your own risk
-# @dev Compiled with Vyper 0.1.0b5
+# @dev Compiled with Vyper 0.1.0b8
 
 owner: public(address)
 
@@ -17,12 +17,11 @@ oracle: public(address)
 @public
 def __init__():
     self.owner = msg.sender
-    self.nonce = 2                                          # bumped after a recompile
     self.issuer_fees = 20                                   # in bips
     self.minimum_collateral_ratio = 12000                   # in bips
     self.liquidity_multiplier = 1 * 10**17                  # 0.1 ether (in wei) per cent of ETH/USD price
-    self.erc20_serenus = 0x3052D1c679eA96500fda71A5Af1Bc2f5fAbC0dA0
-    self.oracle = 0x31130468244Ec6746D24482B14E68365440AAB0A
+    self.erc20_serenus = 0x06A981Bd291C6BFaaB9954dDcEEb782dE805b4b3
+    self.oracle = 0x952F64B83767BF5E61F5f4a4245A750cF2d0B284
 
 @public
 def changeOwner(_address: address):
