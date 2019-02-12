@@ -2,7 +2,7 @@
 # @notice All issuer contracts are created by the factory
 # @notice Source code found at https://github.com/serenuscoin
 # @notice Use at your own risk
-# @dev Compiled with Vyper 0.1.0b5
+# @dev Compiled with Vyper 0.1.0b8
 
 contract Issuer:
     def setup(_id: int128, _owner: address, _governor: address, _target_collateral_ratio: uint256): modifying
@@ -23,11 +23,14 @@ owner: public(address)
 @public
 def __init__():
     self.owner = msg.sender
-    self.issuer_template = 0x0B6176A275244EE96395367E712f770364F4a489
-    self.erc20_serenus = 0x3052D1c679eA96500fda71A5Af1Bc2f5fAbC0dA0
-    self.governor = 0x8cBf8d190Bc49B18147E155f2112ad17Dc3F886c
+    self.issuer_template = 0x10b05B03Da96695CEC7E3d662Ca822c22b34F4D4
+    self.erc20_serenus = 0x06A981Bd291C6BFaaB9954dDcEEb782dE805b4b3
+    self.governor = 0xa0fa98142D57D0eBE45C60073b3Ee32DC9534c25
 
-    self.issuer_id = 1                                      # bumped to 1 after a recompile
+@public
+def changeOwner(_address: address):
+    assert msg.sender == self.owner
+    self.owner = _address
 
 @public
 def liquidate():
@@ -54,9 +57,9 @@ def setGovernorAddress(_address: address):
 # @params A target collateral ratio
 @public
 def createIssuer(_target_collateral_ratio: uint256):
-    self.issuer_id += 1    
     _new_issuer: address = create_with_code_of(self.issuer_template)
     Issuer(_new_issuer).setup(self.issuer_id, msg.sender, self.governor, _target_collateral_ratio)
     ERC20Serenus(self.erc20_serenus).setMinterAddress(_new_issuer)
+    self.issuer_id += 1    
     log.NewIssuer(self.issuer_id, _new_issuer)
 
