@@ -4,7 +4,7 @@
 # @notice A target collateral ratio is set on creation and is modifiable
 # @notice Source code found at https://github.com/serenuscoin
 # @notice Use at your own risk
-# @dev Compiled with Vyper 0.1.0b5
+# @dev Compiled with Vyper 0.1.0b8
 
 # @dev Contract interface for ERC20Serenus
 contract ERC20Serenus:
@@ -74,6 +74,11 @@ def setup(_id: int128, _owner: address, _governor: address, _target_collateral_r
     assert self.target_collateral_ratio >= self.minimum_collateral_ratio
 
     self.num_issued = 0
+
+@public
+def changeOwner(_address: address):
+    assert msg.sender == self.owner
+    self.owner = _address
 
 @public
 def setGovernorAddress(_address: address):
