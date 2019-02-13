@@ -19,7 +19,7 @@ def __init__():
     self.owner = msg.sender
     self.issuer_fees = 20                                   # in bips
     self.minimum_collateral_ratio = 12000                   # in bips
-    self.liquidity_multiplier = 1 * 10**17                  # 0.1 ether (in wei) per cent of ETH/USD price
+    self.liquidity_multiplier = 1 * 10**18                  # 1 ether (in wei) per cent of ETH/USD price
     self.erc20_serenus = 0x06A981Bd291C6BFaaB9954dDcEEb782dE805b4b3
     self.oracle = 0x952F64B83767BF5E61F5f4a4245A750cF2d0B284
 
