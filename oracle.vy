@@ -76,6 +76,8 @@ def setKyberUSDC(_address: address):
     
 # @notice Reads instantaneous midprice for ETH/stablecoin
 # @dev Source can be made more efficient but at the cost of readability
+# @dev Send 1 ether to kyber and send the result back in to get the spread
+# @dev But TUSD is in 18 decimals and USDC is in 6 decimals
 # @return A price as an integer to the nearest cent
 @public
 def read() -> uint256:
@@ -86,17 +88,17 @@ def read() -> uint256:
 
     ethkyber: uint256
     slippage: uint256
-    (ethkyber, slippage) = self.kybernetwork.getExpectedRate(self.kyberether, self.kybertusd, 10**7)
+    (ethkyber, slippage) = self.kybernetwork.getExpectedRate(self.kyberether, self.kybertusd, 10**18)
 
     tusdkyber: uint256
-    (tusdkyber, slippage) = self.kybernetwork.getExpectedRate(self.kybertusd, self.kyberether, ethkyber/10**11)
+    (tusdkyber, slippage) = self.kybernetwork.getExpectedRate(self.kybertusd, self.kyberether, ethkyber)
 
     ethtusd: uint256 = (10**20/tusdkyber + ethkyber/10**16) / 2                             # integer in cents; average rate going back and forth
 
-    (ethkyber, slippage) = self.kybernetwork.getExpectedRate(self.kyberether, self.kyberusdc, 10**7)
+    (ethkyber, slippage) = self.kybernetwork.getExpectedRate(self.kyberether, self.kyberusdc, 10**18)
 
     usdckyber: uint256
-    (usdckyber, slippage) = self.kybernetwork.getExpectedRate(self.kyberusdc, self.kyberether, ethkyber/10**11)
+    (usdckyber, slippage) = self.kybernetwork.getExpectedRate(self.kyberusdc, self.kyberether, ethkyber/10**12)
 
     ethusdc: uint256 = (10**20/usdckyber + ethkyber/10**16) / 2                             # integer in cents; average rate going back and forth
 
