@@ -123,7 +123,7 @@ def issuerWithdrawal(_amount: uint256(wei)):
     
     assert _amount <= self.balance
     if self.num_issued != 0:
-        assert ((self.balance - _amount) * self.ETHUSDprice / 100) / self.num_issued * 10000 >= self.target_collateral_ratio
+        assert ((self.balance - _amount) * self.ETHUSDprice / 100) * 10000 / self.num_issued >= self.target_collateral_ratio
 
     send(self.owner, _amount)
 
@@ -155,7 +155,7 @@ def buyTokens():
     _issuing: uint256(wei) = (_value * _adjustedPrice) / 100
     assert _issuing > 0
     
-    assert ((self.balance + msg.value) * _adjustedPrice / 100) / (self.num_issued + _issuing) * 10000 >= self.target_collateral_ratio
+    assert ((self.balance + msg.value) * _adjustedPrice / 100) * 10000 / (self.num_issued + _issuing) >= self.target_collateral_ratio
     
     # sending tokens
     self.num_issued += _issuing
@@ -195,9 +195,9 @@ def replaceIssuer():
 
     self.ETHUSDprice = self.oracle.read()
     
-    assert (self.balance * self.ETHUSDprice / 100) / self.num_issued * 10000 < self.minimum_collateral_ratio
+    assert (self.balance * self.ETHUSDprice / 100) * 10000 / self.num_issued < self.minimum_collateral_ratio
     
-    assert ((self.balance + msg.value) * self.ETHUSDprice / 100) / self.num_issued * 10000 >= self.minimum_collateral_ratio
+    assert ((self.balance + msg.value) * self.ETHUSDprice / 100) * 10000 / self.num_issued >= self.minimum_collateral_ratio
 
     self.owner = msg.sender
     log.takeoverOwner(self.owner)
@@ -207,7 +207,7 @@ def replaceIssuer():
 @public
 def markForTakeover() -> bool:
     self.ETHUSDprice = self.oracle.read()
-    if (self.balance * self.ETHUSDprice / 100) / self.num_issued * 10000 < self.minimum_collateral_ratio:
+    if (self.balance * self.ETHUSDprice / 100) * 10000 / self.num_issued < self.minimum_collateral_ratio:
         self.marked_on_block = block.number
         log.markedForTakeover(msg.sender)
         return True
