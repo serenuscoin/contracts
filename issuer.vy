@@ -22,6 +22,10 @@ contract Governor:
     def erc20_serenus() -> address: constant
     def oracle() -> address: constant
     def owner() -> address: constant
+
+# @dev Contract interface for Issuer
+contract Issuer:
+    def receiveBalances(_owner: address, _num_issued: uint256(wei)): modifying
     
 # @dev Contract interface for the Oracle
 contract Oracle:
@@ -29,8 +33,7 @@ contract Oracle:
     
 boughtTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
 soldTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
-liquidateContract: event({selfaddress: indexed(address)})
-loge: event({_text: bytes32, _value: uint256(wei)})
+liquidateContract: event({_selfaddress: indexed(address)})
 
 erc20_serenus: ERC20Serenus
 governor: Governor
@@ -208,3 +211,15 @@ def markForTakeover() -> bool:
     self.marked_on_block = 0
     return False
 
+@public
+def sendBalances(_address: address):
+    Issuer(_address).receiveBalances(self.owner, self.num_issued, value=self.balance)
+    self.num_issued = 0
+
+@payable
+@public
+def receiveBalances(_owner: address, _num_issued: uint256(wei)):
+    assert self.owner == _owner
+    self.num_issued += _num_issued
+                    
+    
