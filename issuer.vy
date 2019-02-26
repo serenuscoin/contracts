@@ -47,6 +47,8 @@ issuer_fees: public(uint256)                                # in bips
 minimum_collateral_ratio: public(uint256)                     # in bips
 liquidity_multiplier: public(uint256)
 
+marked_on_block: public(uint256)
+
 # @dev An internal erc-20 tracking variable
 num_issued: public(uint256(wei))
 
@@ -177,11 +179,14 @@ def sellTokens(_value: uint256(wei)):
 
 # @notice Replace issuer if insufficient collateral is available
 # @dev Read current price and check collateral against minimum collateral ratio
+# @dev At least one block must have passed before the last mark
+# @dev This helps prevent atomically spiking Uniswap prices to falsely takeover a contract
 # @dev Replacer must have paid in sufficient collateral to "win" the remainder from the old owner
 @public
 @payable
 def replaceIssuer():
     assert self.num_issued != 0
+    assert block.number - self.marked_on_block > 1 and self.marked_on_block != 0
 
     self.ETHUSDprice = self.oracle.read()
     
@@ -190,3 +195,16 @@ def replaceIssuer():
     assert ((self.balance + msg.value) * self.ETHUSDprice / 100) / self.num_issued * 10000 >= self.minimum_collateral_ratio
 
     self.owner = msg.sender
+
+# @notice Before trying to replace the issuer's owner mark the contract
+# @dev use the block number to track when the mark happened
+@public
+def markForTakeover() -> bool:
+    self.ETHUSDprice = self.oracle.read()
+    if (self.balance * self.ETHUSDprice / 100) / self.num_issued * 10000 < self.minimum_collateral_ratio:
+        self.marked_on_block = block.number
+        return True
+    
+    self.marked_on_block = 0
+    return False
+
