@@ -34,7 +34,9 @@ contract Oracle:
 boughtTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
 soldTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
 liquidateContract: event({_selfaddress: indexed(address)})
-
+takeoverOwner: event({_owner: indexed(address)})
+markedForTakeover: event({_sender: indexed(address)})
+    
 erc20_serenus: ERC20Serenus
 governor: Governor
 oracle: Oracle
@@ -198,7 +200,8 @@ def replaceIssuer():
     assert ((self.balance + msg.value) * self.ETHUSDprice / 100) / self.num_issued * 10000 >= self.minimum_collateral_ratio
 
     self.owner = msg.sender
-
+    log.takeoverOwner(self.owner)
+    
 # @notice Before trying to replace the issuer's owner mark the contract
 # @dev use the block number to track when the mark happened
 @public
@@ -206,6 +209,7 @@ def markForTakeover() -> bool:
     self.ETHUSDprice = self.oracle.read()
     if (self.balance * self.ETHUSDprice / 100) / self.num_issued * 10000 < self.minimum_collateral_ratio:
         self.marked_on_block = block.number
+        log.markedForTakeover(msg.sender)
         return True
     
     self.marked_on_block = 0
