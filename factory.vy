@@ -23,9 +23,9 @@ owner: public(address)
 @public
 def __init__():
     self.owner = msg.sender
-    self.issuer_template = 0x10b05B03Da96695CEC7E3d662Ca822c22b34F4D4
-    self.erc20_serenus = 0x06A981Bd291C6BFaaB9954dDcEEb782dE805b4b3
-    self.governor = 0xa0fa98142D57D0eBE45C60073b3Ee32DC9534c25
+    self.issuer_template = 0xD31E960b3Ad756cdc45A53Af073f61ec3EF3aEc9
+    self.erc20_serenus = 0x3345027649b04E0FD9b80Dd6017ab055B9cA31cc
+    self.governor = 0x3a16f6B2C6515Ded505a6D49e2Fb1DfDf452DA95
 
 @public
 def changeOwner(_address: address):
@@ -55,11 +55,12 @@ def setGovernorAddress(_address: address):
 # @notice Create an issuer from the template
 # @notice Send it a new id, the creator's address, a governor address and a target ratio
 # @params A target collateral ratio
+# @return The new issuer's address
 @public
-def createIssuer(_target_collateral_ratio: uint256):
+def createIssuer(_owner: address, _target_collateral_ratio: uint256) -> address:
     _new_issuer: address = create_with_code_of(self.issuer_template)
-    Issuer(_new_issuer).setup(self.issuer_id, msg.sender, self.governor, _target_collateral_ratio)
+    Issuer(_new_issuer).setup(self.issuer_id, _owner, self.governor, _target_collateral_ratio)
     ERC20Serenus(self.erc20_serenus).setMinterAddress(_new_issuer)
     self.issuer_id += 1    
     log.NewIssuer(self.issuer_id, _new_issuer)
-
+    return _new_issuer

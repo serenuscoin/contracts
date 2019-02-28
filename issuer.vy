@@ -21,7 +21,8 @@ contract Governor:
     def erc20_serenus() -> address: constant
     def oracle() -> address: constant
     def owner() -> address: constant
-
+    def factory() -> address: constant
+    
 # @dev Contract interface for Issuer
 contract Issuer:
     def receiveBalances(_owner: address, _num_issued: uint256(wei)): modifying
@@ -31,7 +32,7 @@ contract Oracle:
     def read() -> uint256: constant
 
 contract Factory:
-    def createIssuer(_target_collateral_ratio: uint256) -> address: modifying
+    def createIssuer(_owner: address, _target_collateral_ratio: uint256) -> address: modifying
     
 boughtTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
 soldTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
@@ -225,8 +226,10 @@ def sendBalances():
     assert (self.balance * self.ETHUSDprice / 100) * 10000 / self.num_issued >= self.minimum_collateral_ratio
 
     _new_issuer: address = self.factory.createIssuer(self.owner, self.target_collateral_ratio)
+    self.erc20_serenus.removeMinterAddress()
     Issuer(_new_issuer).receiveBalances(self.owner, self.num_issued, value=self.balance)
-    self.num_issued = 0
+    log.liquidateContract(self)
+    selfdestruct(self.owner)
 
 @payable
 @public
