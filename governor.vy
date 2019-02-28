@@ -21,9 +21,9 @@ def __init__():
     self.issuer_fees = 20                                   # in bips
     self.minimum_collateral_ratio = 12000                   # in bips
     self.liquidity_multiplier = 1 * 10**18                  # 1 ether (in wei) per cent of ETH/USD price
-    self.erc20_serenus = 0x3345027649b04E0FD9b80Dd6017ab055B9cA31cc
-    self.oracle = 0xDb7e15D19c3d3cD64e1691636Ba8B9346B34F30e
-    self.factory = 0xDb7e15D19c3d3cD64e1691636Ba8B9346B34F30e
+    self.erc20_serenus = ZERO_ADDRESS
+    self.oracle = ZERO_ADDRESS
+    self.factory = ZERO_ADDRESS
 
 @public
 def changeOwner(_address: address):

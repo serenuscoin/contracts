@@ -23,9 +23,9 @@ owner: public(address)
 @public
 def __init__():
     self.owner = msg.sender
-    self.issuer_template = 0xD31E960b3Ad756cdc45A53Af073f61ec3EF3aEc9
-    self.erc20_serenus = 0x3345027649b04E0FD9b80Dd6017ab055B9cA31cc
-    self.governor = 0x3a16f6B2C6515Ded505a6D49e2Fb1DfDf452DA95
+    self.issuer_template = ZERO_ADDRESS
+    self.erc20_serenus = ZERO_ADDRESS
+    self.governor = ZERO_ADDRESS
 
 @public
 def changeOwner(_address: address):
