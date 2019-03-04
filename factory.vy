@@ -56,12 +56,10 @@ def setGovernorAddress(_address: address):
 # @notice Send it a new id, the creator's address, a governor address and a target ratio
 # @params A target collateral ratio
 # @return The new issuer's address
-@payable
 @public
 def createIssuer(_owner: address, _target_collateral_ratio: uint256) -> address:
     _new_issuer: address = create_with_code_of(self.issuer_template)
     Issuer(_new_issuer).setup(self.issuer_id, _owner, self.governor, _target_collateral_ratio)
-    send(_new_issuer, msg.value)
     ERC20Serenus(self.erc20_serenus).setMinterAddress(_new_issuer)
     self.issuer_id += 1    
     log.NewIssuer(self.issuer_id, _new_issuer)
