@@ -220,6 +220,8 @@ def markForTakeover() -> bool:
         self.marked_on_block = 0
         return False
 
+# @notice Migrate state onto new issuer contract
+# @dev No plans for active usage; ownership is preserved
 @public
 def sendBalances():
     assert msg.sender == self.owner or msg.sender == self.governor.owner()
@@ -231,6 +233,8 @@ def sendBalances():
     log.liquidateContract(self)
     selfdestruct(self.owner)
 
+# @notice Migrate state onto new issuer contract
+# @dev No plans for active usage; ownership is preserved
 @payable
 @public
 def receiveBalances(_owner: address, _num_issued: uint256(wei)):
