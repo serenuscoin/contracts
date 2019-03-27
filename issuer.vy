@@ -22,6 +22,8 @@ contract Governor:
     def oracle() -> address: constant
     def owner() -> address: constant
     def factory() -> address: constant
+    def insurance() -> address: constant
+    def insurance_fee() -> uint256: constant
     
 # @dev Contract interface for Issuer
 contract Issuer:
@@ -31,9 +33,14 @@ contract Issuer:
 contract Oracle:
     def read() -> uint256: constant
 
+# @dev Contract interface for the Factory
 contract Factory:
     def createIssuer(_owner: address, _target_collateral_ratio: uint256) -> address: modifying
-    
+
+# @dev Contract interface for Insurance
+contract Insurance:
+    def requestFunds(): constant
+
 boughtTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
 soldTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
 liquidateContract: event({_selfaddress: indexed(address)})
@@ -44,17 +51,19 @@ erc20_serenus: ERC20Serenus
 governor: Governor
 oracle: Oracle
 factory: Factory
+insurance: Insurance
 
 ETHUSDprice: public(uint256)                                # in cents
 
 issuer_id: public(int128)
 owner: public(address)
-target_collateral_ratio: public(uint256)                      # in bips
+target_collateral_ratio: public(uint256)                    # in bips
 
 nonce: public(int128)
 issuer_fees: public(uint256)                                # in bips
-minimum_collateral_ratio: public(uint256)                     # in bips
+minimum_collateral_ratio: public(uint256)                   # in bips
 liquidity_multiplier: public(uint256)
+insurance_fee: public(uint256)                              # in bips
 
 marked_on_block: public(uint256)
 
@@ -82,6 +91,8 @@ def setup(_id: int128, _owner: address, _governor: address, _target_collateral_r
     self.erc20_serenus = self.governor.erc20_serenus()
     self.oracle = self.governor.oracle()
     self.factory = self.governor.factory()
+    self.insurance = self.governor.insurance()
+    self.insurance_fee = self.governor.insurance_fee()
     
     assert self.target_collateral_ratio >= self.minimum_collateral_ratio
 
@@ -106,6 +117,9 @@ def readGovernor():
     self.liquidity_multiplier = self.governor.liquidity_multiplier()
     self.erc20_serenus = self.governor.erc20_serenus()
     self.oracle = self.governor.oracle()
+    self.factory = self.governor.factory()
+    self.insurance = self.governor.insurance()
+    self.insurance_fee = self.governor.insurance_fee()
 
 # @notice The owner can reset a desirable collateral ratio
 @public
@@ -199,11 +213,16 @@ def replaceIssuer():
     assert block.number - self.marked_on_block > 1 and self.marked_on_block != 0
 
     self.ETHUSDprice = self.oracle.read()
-    
+
+    # check that issuer has less than the minimum collateral
     assert ((self.balance - msg.value) * self.ETHUSDprice / 100) * 10000 / self.num_issued < self.minimum_collateral_ratio
 
-    assert (self.balance * self.ETHUSDprice / 100) * 10000 / self.num_issued >= self.minimum_collateral_ratio
+    # send an insurance pool addition
+    send(self.insurance, (self.balance - msg.value) * self.insurance_fee / 10000)
 
+    # then check whether there is still enough to colleralise the contract
+    assert (self.balance * self.ETHUSDprice / 100) * 10000 / self.num_issued >= self.minimum_collateral_ratio
+    
     self.owner = msg.sender
     log.takeoverOwner(self.owner)
     
@@ -240,5 +259,4 @@ def sendBalances():
 def receiveBalances(_owner: address, _num_issued: uint256(wei)):
     assert _owner == self.owner
     self.num_issued += _num_issued
-                    
-    
+
