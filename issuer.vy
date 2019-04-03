@@ -40,7 +40,7 @@ contract Factory:
 # @dev Contract interface for Insurance
 contract Insurance:
     def requestFunds(): constant
-
+    
 boughtTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
 soldTokens: event({_from: indexed(address), _to: indexed(address), _value: uint256(wei)})
 liquidateContract: event({_selfaddress: indexed(address)})
@@ -51,7 +51,6 @@ erc20_serenus: ERC20Serenus
 governor: Governor
 oracle: Oracle
 factory: Factory
-insurance: Insurance
 
 ETHUSDprice: public(uint256)                                # in cents
 
@@ -64,6 +63,7 @@ issuer_fees: public(uint256)                                # in bips
 minimum_collateral_ratio: public(uint256)                   # in bips
 liquidity_multiplier: public(uint256)
 insurance_fee: public(uint256)                              # in bips
+insurance: public(address)
 
 marked_on_block: public(uint256)
 
@@ -127,6 +127,12 @@ def setTargetCollateralRatio(_new_ratio: uint256):
     assert msg.sender == self.owner
     self.target_collateral_ratio = _new_ratio
 
+# @notice Insurance pool can fund an issuer
+@public
+@payable
+def poolInsuranceDeposit():
+    assert msg.sender == self.insurance
+    
 # @notice The owner must send in some ether and may need to top up later
 @public
 @payable
