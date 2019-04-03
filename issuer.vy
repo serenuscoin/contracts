@@ -257,7 +257,7 @@ def sendBalances():
     self.erc20_serenus.removeMinterAddress()
     Issuer(_new_issuer).receiveBalances(self.owner, self.num_issued, value=self.balance)
     log.liquidateContract(self)
-    selfdestruct(self)
+    selfdestruct(self.owner)
 
 # @notice Migrate state onto new issuer contract
 # @dev No plans for active usage; ownership is preserved
