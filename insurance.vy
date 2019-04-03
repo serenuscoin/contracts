@@ -28,8 +28,8 @@ contract Issuer:
 contract Oracle:
     def read() -> uint256: constant
 
-receivePool: event({amount: uint256(wei), from: indexed(address)})
-sendPool: event({amount: uint256(wei), from: indexed(address)})
+receivePool: event({_amount: uint256(wei), _from: indexed(address)})
+sendPool: event({_amount: uint256(wei), _from: indexed(address)})
 
 erc20_serenus: ERC20Serenus
 governor: Governor
@@ -65,7 +65,6 @@ def readGovernor():
     self.nonce = self.governor.nonce()
     self.erc20_serenus = self.governor.erc20_serenus()
     self.oracle = self.governor.oracle()
-    self.insurance = self.governor.insurance()
     self.insurance_payoff = self.governor.insurance_payoff()
 
 @public
@@ -80,8 +79,7 @@ def send_collateral(_issuer_address: address):
 
     _eth_usd: uint256 = self.oracle.read()
     _balance: uint256(wei) = _issuer_address.balance
-    self.issuer = _issuer_address
-    _supply: uint256 = self.issuer.num_issued()
+    _supply: uint256 = Issuer(_issuer_address).num_issued()
 
     assert _supply > 0
     assert (_balance * _eth_usd / 100) * 10000 / _supply < 10000
