@@ -244,6 +244,7 @@ def markForTakeover() -> bool:
 @public
 def sendBalances():
     assert msg.sender == self.owner or msg.sender == self.governor.owner()
+    self.ETHUSDprice = self.oracle.read()
     assert (self.balance * self.ETHUSDprice / 100) * 10000 / self.num_issued >= self.minimum_collateral_ratio
 
     _new_issuer: address = self.factory.createIssuer(self.owner, self.target_collateral_ratio)
