@@ -39,7 +39,6 @@ owner: public(address)
 
 nonce: public(int128)
 insurance_payoff: public(uint256)                           # in bips
-issuer: public(address)
 
 @public
 def __init__():
