@@ -56,7 +56,7 @@ def __default__():
 # @notice It may be needed if the governor changes later
 @public
 def setGovernorAddress(_address: address):
-    assert msg.sender == self.governor.owner() or self.governor == ZERO_ADDRESS
+    assert msg.sender == self.owner
     self.governor = _address
 
 # @notice Anyone can force the issuer to read new Governor contract values (if any)
