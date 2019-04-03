@@ -220,7 +220,7 @@ def replaceIssuer():
     # send an insurance pool addition
     send(self.insurance, (self.balance - msg.value) * self.insurance_fee / 10000)
 
-    # then check whether there is still enough to colleralise the contract
+    # then check whether there is still enough to collateralise the contract
     assert (self.balance * self.ETHUSDprice / 100) * 10000 / self.num_issued >= self.minimum_collateral_ratio
     
     self.owner = msg.sender
